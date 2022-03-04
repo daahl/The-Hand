@@ -6,7 +6,12 @@ uint8_t broadcastAdress[] = {0x94,0xB9,0x7E,0xE6,0x79,0x9C}; //MAC-adress till d
 //uint8_t broadcastAdress[] = {0x7C,0x9E,0xBD,0x60,0xD1,0x8C}; //MAC till den med kondensatorn
 //uint8_t broadcastAdress[] = {0X7C,0X9E,0XBD,0X61,0X58,0XF4}; //MAC till den med vit tejp
 
+int recID = 0;
+int error = 0;
+int succ = 0;
+
 typedef struct struct_message{
+  int msgID;
   float test1;
   float test2;
   float test3;
@@ -31,14 +36,17 @@ struct_message testINC;
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
     Serial.print("\r\nLast Packet Send Status:\t");
     Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+    if(status == ESP_NOW_SEND_FAIL ? error++ : succ++);
+    Serial.println(error);
 }
 
 // Callback when data is received, triggas när något mottas (används ej)
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&testINC, incomingData, sizeof(testINC));
-  Serial.print("Bytes received: ");
-  Serial.println(len);
-  Serial.println(testINC.test1);
+  //Serial.print("Bytes received: ");
+  //Serial.println(len);
+  //Serial.println(testINC.test1);
+  recID++;
 }
 
 void getMACAdress(){
@@ -47,6 +55,7 @@ void getMACAdress(){
 }
 
 void init_wifi (){
+  msg_to_send.msgID = 1;
   WiFi.mode(WIFI_STA);
   if (esp_now_init() != ESP_OK) {
     Serial.println("Error initializing ESP-NOW");
